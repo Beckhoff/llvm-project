@@ -256,16 +256,16 @@ public:
   /// \param FlagsToInclude - If non-zero, only include options with any
   ///                         of these flags set.
   /// \param FlagsToExclude - Exclude options with any of these flags set.
-  /// \param ShowAllAliases - If true, display all options including aliases
-  ///                         that don't have help texts. By default, we display
-  ///                         only options that are not hidden and have help
-  ///                         texts.
+  /// \param ShowAllAliases - If false, hide aliases that do not have their
+  ///                         own help text.
+  /// \param ShowUndocumented - If false, hide options without help text.
   void printHelp(raw_ostream &OS, const char *Usage, const char *Title,
                  unsigned FlagsToInclude, unsigned FlagsToExclude,
-                 bool ShowAllAliases) const;
+                 bool ShowAllAliases, bool ShowUndocumented) const;
 
   void printHelp(raw_ostream &OS, const char *Usage, const char *Title,
-                 bool ShowHidden = false, bool ShowAllAliases = false) const;
+                 bool ShowHidden = false, bool ShowAllAliases = false,
+                 bool ShowUndocumented = true) const;
 };
 
 /// Specialization of OptTable

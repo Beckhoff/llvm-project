@@ -572,10 +572,65 @@ static std::string getOptionHelpName(const OptTable &Opts, OptSpecifier Id) {
   return Name;
 }
 
+static std::string getAliasHelp(const OptTable &Opts, OptSpecifier Id) {
+  const Option O = Opts.getOption(Id);
+  const Option Alias = O.getAlias();
+  const char *AliasArgs = O.getAliasArgs();
+
+  std::string HelpText = "Is an alias of ";
+
+  if (nullptr != AliasArgs) {
+    HelpText += Alias.getPrefixedName();
+
+    char Separator = ' ';
+    switch (Alias.getKind()) {
+    case Option::GroupClass:
+    case Option::InputClass:
+    case Option::UnknownClass:
+    case Option::ValuesClass:
+      llvm_unreachable("Invalid option used as an alias.");
+
+    case Option::FlagClass:
+      llvm_unreachable("An Option which has a Flag cannot have arguments.");
+
+    case Option::MultiArgClass:
+    case Option::SeparateClass:
+    case Option::JoinedOrSeparateClass:
+    case Option::RemainingArgsClass:
+    case Option::RemainingArgsJoinedClass:
+      HelpText += ' ';
+      break;
+
+    case Option::CommaJoinedClass:
+      Separator = ',';
+      break;
+
+    case Option::JoinedClass:
+    case Option::JoinedAndSeparateClass:
+      break;
+    }
+
+    bool first_round = true;
+    while (true) {
+      StringRef Arg = AliasArgs;
+      if (Arg.empty())
+        break;
+      AliasArgs = AliasArgs + Arg.size() + 1;
+      if (!first_round)
+        HelpText += Separator;
+      HelpText += Arg;
+      first_round = false;
+    }
+  } else {
+    HelpText += getOptionHelpName(Opts, Alias.getID());
+  }
+  return HelpText;
+}
+
 namespace {
 struct OptionInfo {
   std::string Name;
-  StringRef HelpText;
+  std::string HelpText;
 };
 } // namespace
 
@@ -597,6 +652,11 @@ static void PrintHelpOptionList(raw_ostream &OS, StringRef Title,
     const std::string &Option = Opt.Name;
     int Pad = OptionFieldWidth - int(Option.size());
     OS.indent(InitialPad) << Option;
+
+    if (Opt.HelpText.empty()) {
+      OS << '\n';
+      continue;
+    }
 
     // Break on long option names.
     if (Pad < 0) {
@@ -626,24 +686,28 @@ static const char *getOptionHelpGroup(const OptTable &Opts, OptSpecifier Id) {
 }
 
 void OptTable::printHelp(raw_ostream &OS, const char *Usage, const char *Title,
-                         bool ShowHidden, bool ShowAllAliases) const {
+                         bool ShowHidden, bool ShowAllAliases,
+                         bool ShowUndocumented) const {
   printHelp(OS, Usage, Title, /*Include*/ 0, /*Exclude*/
-            (ShowHidden ? 0 : HelpHidden), ShowAllAliases);
+            (ShowHidden ? 0 : HelpHidden), ShowAllAliases, ShowUndocumented);
 }
 
 void OptTable::printHelp(raw_ostream &OS, const char *Usage, const char *Title,
                          unsigned FlagsToInclude, unsigned FlagsToExclude,
-                         bool ShowAllAliases) const {
+                         bool ShowAllAliases, bool ShowUndocumented) const {
   OS << "OVERVIEW: " << Title << "\n\n";
   OS << "USAGE: " << Usage << "\n\n";
 
   // Render help text into a map of group-name to a list of (option, help)
   // pairs.
   std::map<std::string, std::vector<OptionInfo>> GroupedOptionHelp;
+  static constexpr StringLiteral Undocumented{"(Undocumented)"};
 
   for (unsigned Id = 1, e = getNumOptions() + 1; Id != e; ++Id) {
     // FIXME: Split out option groups.
-    if (getOptionKind(Id) == Option::GroupClass)
+    auto Kind = getOptionKind(Id);
+    if (Kind == Option::GroupClass || Kind == Option::InputClass ||
+        Kind == Option::UnknownClass)
       continue;
 
     unsigned Flags = getInfo(Id).Flags;
@@ -654,18 +718,26 @@ void OptTable::printHelp(raw_ostream &OS, const char *Usage, const char *Title,
 
     // If an alias doesn't have a help text, show a help text for the aliased
     // option instead.
-    const char *HelpText = getOptionHelpText(Id);
-    if (!HelpText && ShowAllAliases) {
+    std::string HelpText = StringRef{getOptionHelpText(Id)}.str();
+    if (HelpText.empty()) {
       const Option Alias = getOption(Id).getAlias();
-      if (Alias.isValid())
-        HelpText = getOptionHelpText(Alias.getID());
+      if (Alias.isValid()) {
+        if (!ShowAllAliases)
+          continue;
+        HelpText = getAliasHelp(*this, Id);
+      }
     }
 
-    if (HelpText && (strlen(HelpText) != 0)) {
-      const char *HelpGroup = getOptionHelpGroup(*this, Id);
-      const std::string &OptName = getOptionHelpName(*this, Id);
-      GroupedOptionHelp[HelpGroup].push_back({OptName, HelpText});
+    if (HelpText.empty()) {
+      if (!ShowUndocumented)
+        continue;
+      HelpText = Undocumented;
     }
+
+    const char *HelpGroup = getOptionHelpGroup(*this, Id);
+    std::string OptName = getOptionHelpName(*this, Id);
+    GroupedOptionHelp[HelpGroup].push_back(
+        {std::move(OptName), std::move(HelpText)});
   }
 
   for (auto& OptionGroup : GroupedOptionHelp) {
