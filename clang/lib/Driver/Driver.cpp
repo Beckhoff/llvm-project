@@ -1952,7 +1952,7 @@ int Driver::ExecuteCompilation(
   return Res;
 }
 
-void Driver::PrintHelp(bool ShowHidden) const {
+void Driver::PrintHelp(bool ShowHidden, bool ShowAllAliases) const {
   unsigned IncludedFlagsBitmask;
   unsigned ExcludedFlagsBitmask;
   std::tie(IncludedFlagsBitmask, ExcludedFlagsBitmask) =
@@ -1970,8 +1970,7 @@ void Driver::PrintHelp(bool ShowHidden) const {
   std::string Usage = llvm::formatv("{0} [options] file...", Name).str();
   getOpts().printHelp(llvm::outs(), Usage.c_str(), DriverTitle.c_str(),
                       IncludedFlagsBitmask, ExcludedFlagsBitmask,
-                      /*ShowAllAliases=*/false,
-                      /*ShowUndocumented=*/!IsFlangMode());
+                      ShowAllAliases, /*ShowUndocumented=*/!IsFlangMode());
 }
 
 void Driver::PrintVersion(const Compilation &C, raw_ostream &OS) const {
@@ -2119,8 +2118,10 @@ bool Driver::HandleImmediateArgs(const Compilation &C) {
   }
 
   if (C.getArgs().hasArg(options::OPT_help) ||
-      C.getArgs().hasArg(options::OPT__help_hidden)) {
-    PrintHelp(C.getArgs().hasArg(options::OPT__help_hidden));
+      C.getArgs().hasArg(options::OPT__help_hidden) ||
+      C.getArgs().hasArg(options::OPT__help_alias)) {
+    PrintHelp(C.getArgs().hasArg(options::OPT__help_hidden),
+              C.getArgs().hasArg(options::OPT__help_alias));
     return false;
   }
 

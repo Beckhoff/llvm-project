@@ -4701,6 +4701,8 @@ def _force_link_EQ : Joined<["--"], "force-link=">, Alias<u>;
 def _force_link : Separate<["--"], "force-link">, Alias<u>;
 def _help_hidden : Flag<["--"], "help-hidden">,
   HelpText<"Display help for hidden options">;
+def _help_alias : Flag<["--"], "help-alias">,
+  HelpText<"List options that are aliases of other options and do not have their own help text.">;
 def _imacros_EQ : Joined<["--"], "imacros=">, Alias<imacros>;
 def _include_barrier : Flag<["--"], "include-barrier">, Alias<I_>;
 def _include_directory_after_EQ : Joined<["--"], "include-directory-after=">, Alias<idirafter>;
