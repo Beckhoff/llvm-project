@@ -5399,11 +5399,11 @@ def fintrinsic_modules_path : Separate<["-"], "fintrinsic-modules-path">,  Group
   DocBrief<[{This option specifies the location of pre-compiled intrinsic modules,
   if they are not in the default location expected by the compiler.}]>;
 
-defm backslash : OptInFC1FFlag<"backslash", "Specify that backslash in string introduces an escape character">;
-defm xor_operator : OptInFC1FFlag<"xor-operator", "Enable .XOR. as a synonym of .NEQV.">;
-defm logical_abbreviations : OptInFC1FFlag<"logical-abbreviations", "Enable logical abbreviations">;
-defm implicit_none : OptInFC1FFlag<"implicit-none", "No implicit typing allowed unless overridden by IMPLICIT statements">;
-defm underscoring : OptInFC1FFlag<"underscoring", "Appends one trailing underscore to external names">;
+defm backslash : OptInFC1FFlag<"backslash", "Specify that backslash in string introduces an escape character", "Specify that backslash in string does not introduces an escape character">;
+defm xor_operator : OptInFC1FFlag<"xor-operator", "Enable", "Disable", " .XOR. as a synonym of .NEQV.">;
+defm logical_abbreviations : OptInFC1FFlag<"logical-abbreviations", "Enable", "Disable", " logical abbreviations">;
+defm implicit_none : OptInFC1FFlag<"implicit-none", "No implicit typing allowed unless overridden by IMPLICIT statements", "Implicit typing allowed">;
+defm underscoring : OptInFC1FFlag<"underscoring", "Appends", "Does not append", " one trailing underscore to external names">;
 
 def fno_automatic : Flag<["-"], "fno-automatic">, Group<f_Group>,
   HelpText<"Implies the SAVE attribute for non-automatic local objects in subprograms unless RECURSIVE">;
@@ -5473,7 +5473,7 @@ def module_suffix : Separate<["-"], "module-suffix">,  Group<f_Group>, MetaVarNa
   HelpText<"Use <suffix> as the suffix for module files (the default value is `.mod`)">;
 def fno_reformat : Flag<["-"], "fno-reformat">, Group<Preprocessor_Group>,
   HelpText<"Dump the cooked character stream in -E mode">;
-defm analyzed_objects_for_unparse : OptOutFC1FFlag<"analyzed-objects-for-unparse", "", "Do not use the analyzed objects when unparsing">;
+defm analyzed_objects_for_unparse : OptOutFC1FFlag<"analyzed-objects-for-unparse", "U", "Do not u", "se the analyzed objects when unparsing">;
 
 def emit_fir : Flag<["-"], "emit-fir">, Group<Action_Group>,
   HelpText<"Build the parse tree, then lower it to FIR">;
