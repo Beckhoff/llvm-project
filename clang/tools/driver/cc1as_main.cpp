@@ -645,7 +645,7 @@ int cc1as_main(ArrayRef<const char *> Argv, const char *Argv0, void *MainAddr) {
         llvm::outs(), "clang -cc1as [options] file...",
         "Clang Integrated Assembler",
         /*Include=*/driver::options::CC1AsOption, /*Exclude=*/0,
-        /*ShowAllAliases=*/false);
+        /*ShowAllAliases=*/false, /*ShowUndocumented=*/true);
     return 0;
   }
 

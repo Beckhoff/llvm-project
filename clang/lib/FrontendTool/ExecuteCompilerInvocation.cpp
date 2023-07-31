@@ -202,7 +202,7 @@ bool ExecuteCompilerInvocation(CompilerInstance *Clang) {
         llvm::outs(), "clang -cc1 [options] file...",
         "LLVM 'Clang' Compiler: http://clang.llvm.org",
         /*Include=*/driver::options::CC1Option,
-        /*Exclude=*/0, /*ShowAllAliases=*/false);
+        /*Exclude=*/0, /*ShowAllAliases=*/false, /*ShowUndocumented=*/true);
     return true;
   }
 

@@ -108,7 +108,7 @@ bool executeCompilerInvocation(CompilerInstance *flang) {
         "LLVM 'Flang' Compiler",
         /*Include=*/clang::driver::options::FC1Option,
         /*Exclude=*/llvm::opt::DriverFlag::HelpHidden,
-        /*ShowAllAliases=*/false);
+        /*ShowAllAliases=*/false, /*ShowUndocumented=*/false);
     return true;
   }
 

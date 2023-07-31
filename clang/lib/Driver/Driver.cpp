@@ -1970,7 +1970,8 @@ void Driver::PrintHelp(bool ShowHidden) const {
   std::string Usage = llvm::formatv("{0} [options] file...", Name).str();
   getOpts().printHelp(llvm::outs(), Usage.c_str(), DriverTitle.c_str(),
                       IncludedFlagsBitmask, ExcludedFlagsBitmask,
-                      /*ShowAllAliases=*/false);
+                      /*ShowAllAliases=*/false,
+                      /*ShowUndocumented=*/!IsFlangMode());
 }
 
 void Driver::PrintVersion(const Compilation &C, raw_ostream &OS) const {
